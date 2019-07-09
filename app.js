@@ -1,5 +1,10 @@
 const express = require('express');
+const bodyParser = require('body-parser');
 const app = express();
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true}));
+
 let users = [
   {
     id: 1,
@@ -52,6 +57,26 @@ app.delete('/users/:id', (req, res) => {
   res.status(204).send();
 });
 
+app.post('/users', (req, res) => {
+  const name = req.body.name || '';
+
+  if ( !name.length ) {
+    return res.status(400).json({error: 'Incorrect name'});
+  }
+
+  const id = users.reduce((maxId, user) => {
+    return user.id > maxId ? user.id : maxId
+  }, 0) + 1;
+
+  const newUser = {
+    id : id,
+    name : name
+  };
+
+  users.push(newUser);
+
+  return res.status(201).json(newUser);
+})
 
 app.listen(3000, ()=>{
   console.log('[RUN] api server port 3000');
